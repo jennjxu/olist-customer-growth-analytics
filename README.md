@@ -18,17 +18,17 @@ The analysis completed so far has identified several important patterns:
 
 - **Marketplace growth was primarily volume-driven.** Revenue closely tracked order-volume growth across the reliable monthly observation window, while average order value remained comparatively stable.
 
-- **Repeat customers were substantially more valuable per customer.** Repeat customers generated approximately **$262 in merchandise revenue per customer**, compared with approximately **$139 for one-time customers**.
+- **Repeat customers were substantially more valuable per customer.** Repeat customers generated approximately **R$262 in recorded merchandise value per customer**, compared with approximately **R$139 for one-time customers**.
 
 - **Repeat-customer value came from frequency rather than larger orders.** Repeat customers averaged approximately **2.11 orders** but had a lower average customer AOV than one-time customers.
 
-- **Customer revenue is highly right-skewed.** Median customer revenue was approximately **$89.90**, compared with a mean of **$142.44**, a 95th percentile of **$422**, and a maximum of **$13,440**.
+- **Customer merchandise value is highly right-skewed.** Median customer merchandise value was approximately **R$89.90**, compared with a mean of **R$142.44**, a 95th percentile of **R$422**, and a maximum of **R$13,440**.
 
-- **Seller-side revenue is considerably more concentrated than customer-side revenue.** The top 10% of sellers generated approximately **67.6%** of merchandise revenue, compared with approximately **41.2%** for the top 10% of customers.
+- **Seller-side merchandise value is considerably more concentrated than customer-side merchandise value.** The top 10% of sellers accounted for approximately **67.6%** of recorded merchandise value, compared with approximately **41.2%** for the top 10% of customers.
 
 - **Product categories have different economic profiles.** High revenue can emerge through high sales volume, higher item value, or a combination of the two rather than through one common category pattern.
 
-- **Category revenue is moderately concentrated.** The top five categories generated approximately **39.7%** of merchandise revenue, while the top ten generated approximately **62.4%**.
+- **Category merchandise value is moderately concentrated.** The top five categories accounted for approximately **39.7%** of recorded merchandise revenue, while the top ten generated approximately **62.4%**.
 
 These findings establish the economic structure that motivates the next stages of the project: customer segmentation, retention analysis, and predictive modeling.
 
@@ -276,16 +276,22 @@ The PostgreSQL results matched the earlier pandas audit, providing an additional
 
 Unless otherwise stated:
 
-> **Merchandise revenue = `SUM(order_items.price)`**
+> **Recorded merchandise value = `SUM(order_items.price)`**
 
-Freight is excluded from merchandise revenue.
+Freight is excluded from recorded merchandise value.
+
+All monetary values are reported in Brazilian reais (BRL, R$), with no currency conversion applied.
+
+The metric includes recorded order items across all order statuses. An order-status audit found that approximately **97.28%** of merchandise value was associated with delivered orders, while canceled and unavailable orders accounted for approximately **0.72%**.
+
+Recorded merchandise value should not be interpreted as accounting-recognized revenue.
 
 ### Baseline Marketplace Metrics
 
 - **99,441 total orders**
 - **96,096 unique customers**
-- approximately **$13.59M in merchandise revenue**
-- approximately **$137.75 average merchandise value per order**
+- approximately **R$13.59M in recorded merchandise value**
+- approximately **R$137.75 average recorded merchandise value per order**
 
 These metrics establish marketplace scale. The deeper analysis focuses on the mechanisms behind marketplace growth and customer value.
 
@@ -305,7 +311,7 @@ Revenue and order volume were normalized to a common baseline:
 January 2017 = 100
 ```
 
-This allows revenue measured in dollars and order volume measured in counts to be compared through their relative movement over time.
+This allows merchandise value, measured in Brazilian reais (BRL), and order volume, measured in counts, to be compared through their relative movement over time.
 
 ### Finding
 
@@ -329,7 +335,7 @@ To investigate the underlying economics, I compared:
 - average item value
 - merchandise revenue
 
-Category sales volume is strongly right-skewed, so the final visualization uses a logarithmic x-axis for `items_sold` while retaining average item value on a linear dollar scale.
+Category sales volume is strongly right-skewed, so the final visualization uses a logarithmic x-axis for `items_sold` while retaining average item value on a linear BRL scale.
 
 ### Selected Category Profiles
 
@@ -360,14 +366,14 @@ Customer economics are measured at the `customer_unique_id` level.
 
 The reusable customer-level analytical dataset includes:
 
-- total merchandise revenue
+- total merchandise value
 - order count
 - average order value
 - first purchase date
 - last purchase date
 - one-time vs repeat status
 
-The merchandise-revenue customer dataset contains **95,420 customers represented in `order_items`**.
+The merchandise-value customer dataset contains **95,420 customers represented in `order_items`**.
 
 This differs from the full **96,096 unique customers** because some customers have orders without corresponding rows in the order-item table and therefore cannot contribute to merchandise-revenue calculations.
 
@@ -377,12 +383,12 @@ This differs from the full **96,096 unique customers** because some customers ha
 
 For customers represented in the merchandise-revenue analysis:
 
-| Customer Type | Customers | Avg. Revenue per Customer | Avg. Customer AOV | Avg. Orders per Customer |
+| Customer Type | Customers | Avg. Merchandise Value per Customer | Avg. Customer AOV | Avg. Orders per Customer |
 |---|---:|---:|---:|---:|
-| One-Time | 92,507 | ~$138.67 | ~$138.67 | 1.00 |
-| Repeat | 2,913 | ~$262.03 | ~$123.98 | ~2.11 |
+| One-Time | 92,507 | ~R$138.67 | ~R$138.67 | 1.00 |
+| Repeat | 2,913 | ~R$262.03 | ~R$123.98 | ~2.11 |
 
-Repeat customers generate substantially more merchandise revenue per customer despite having **lower average order value**.
+Repeat customers generate substantially more merchandise value per customer despite having **lower average order value**.
 
 The value difference is therefore primarily associated with **purchase frequency rather than larger individual orders**.
 
@@ -396,25 +402,25 @@ This motivates later segmentation and predictive modeling focused on identifying
 
 ---
 
-## 6. Customer Revenue Distribution
+## 6. Customer Merchandise Value Distribution
 
-Customer merchandise revenue is strongly right-skewed.
+Customer merchandise value is strongly right-skewed.
 
-| Metric | Customer Revenue |
+| Metric | Customer Merchandise Value |
 |---|---:|
-| Minimum | $0.85 |
-| Median | $89.90 |
-| Mean | $142.44 |
-| 75th percentile | $155 |
-| 90th percentile | $284 |
-| 95th percentile | $422 |
-| Maximum | $13,440 |
+| Minimum | R$0.85 |
+| Median | R$89.90 |
+| Mean | R$142.44 |
+| 75th percentile | R$155 |
+| 90th percentile | R$284 |
+| 95th percentile | R$422 |
+| Maximum | R$13,440 |
 
 The mean is substantially higher than the median, while the maximum is far beyond the upper percentiles.
 
-This means average customer revenue alone is not representative of the broader customer population.
+This means average customer merchandise value alone is not representative of the broader customer population.
 
-Most customers generate relatively modest merchandise revenue while a small high-value tail reaches substantially larger values.
+Most customers have relatively modest recorded merchandise revenue while a small high-value tail reaches substantially larger values.
 
 ![Customer revenue distribution](visuals/customer_revenue_distribution.png)
 
@@ -422,11 +428,11 @@ This heterogeneity provides a direct motivation for customer segmentation rather
 
 ---
 
-## 7. Customer vs Seller Revenue Concentration
+## 7. Customer vs Seller Merchandise Value Concentration
 
 Olist operates as a two-sided marketplace, so revenue concentration was evaluated on both the demand and supply sides.
 
-Customers and sellers were separately ranked by merchandise revenue and divided into percentiles.
+Customers and sellers were separately ranked by merchandise value and divided into percentiles.
 
 | Revenue Cutoff | Customers | Sellers |
 |---|---:|---:|
@@ -549,9 +555,9 @@ Several limitations are important when interpreting the current analysis:
 
 - The dataset represents historical Olist activity in Brazil and should not automatically be generalized to other markets.
 - Sparse months occur at the beginning and end of the observation period.
-- Merchandise revenue is defined using item price and excludes freight unless otherwise stated.
+- Recorded merchandise value is defined using item price and excludes freight unless otherwise stated.
 - Some orders do not contain corresponding `order_items` records.
-- Customer merchandise-revenue analysis therefore covers only customers represented in `order_items`.
+- Customer merchandise-value analysis therefore covers only customers represented in `order_items`.
 - Product metadata contains missing values.
 - Review records require careful joins because identifiers are not unique at the row level.
 - Revenue concentration describes observed marketplace structure but does not establish causal dependency.
@@ -579,7 +585,8 @@ olist-customer-growth-analytics/
 ├── sql/
 │   ├── 01_data_quality.sql
 │   ├── 02_revenue_kpis.sql
-│   └── 03_marketplace_customer_economics.sql
+│   ├── 03_marketplace_customer_economics.sql
+│   └── 03b_metric_validation.sql
 │
 ├── visuals/
 │   ├── category_volume_value_drivers.png
